@@ -17,7 +17,7 @@ namespace Sample{
           //再生
           Aimp::Remote.Play();
           //一時停止
-          Aimp::Remote.PlayPause();
+          Aimp::Remote.Pause();
           //選択中の曲の長さ取得
           Console.WriteLine(Aimp::Remote.Duration);
           //音量を80%に指定
