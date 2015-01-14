@@ -81,7 +81,7 @@ namespace GaoLib.Api.Aimp
         /// <summary>
         /// (読み取り専用)AIMPが起動しているかどうかを示すプロパティです。
         /// </summary>
-        public static bool IsOpen
+        public static bool IsRunning
         {
             private set { }
             get
@@ -376,13 +376,13 @@ namespace GaoLib.Api.Aimp
 
         //誰か氏～～～～～～～～ｗｗｗｗｗｗｗｗ誰か氏僕の代わりに<summary>付けてくれ～～～～～～ｗｗｗｗｗｗｗｗｗｗ
         #region コマンド各種
-        public static void Show()
+        public static void Run()
         {
-            _Show();
+            _Run();
         }
-        public static void ShowSync(int delay = 100)
+        public static void RunSync(int delay = 100)
         {
-            using (var p = _Show())
+            using (var p = _Run())
             {
                 // アイドル状態を待つといったな？
                 p.WaitForInputIdle();
@@ -474,7 +474,7 @@ namespace GaoLib.Api.Aimp
         #endregion
 
         #region 補助用のprivateメソッド各種
-        private static Process _Show()
+        private static Process _Run()
         {
             var filePath = ((string)Microsoft.Win32.Registry.GetValue("HKEY_CLASSES_ROOT\\Applications\\AIMP3.exe\\shell\\open\\command", null, null)).Split(new char[] { '"' })[1];
             if (String.IsNullOrEmpty(filePath))
