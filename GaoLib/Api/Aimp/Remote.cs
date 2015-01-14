@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.MemoryMappedFiles;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace GaoLib.Api.Aimp
 {
@@ -79,6 +76,26 @@ namespace GaoLib.Api.Aimp
             get
             {
                 return new VersionInfo(GetProperty(Core.Property.VERSION).ToInt32());
+            }
+        }
+        /// <summary>
+        /// (読み取り専用)AIMPが起動しているかどうかを示すプロパティです。
+        /// </summary>
+        public static bool IsOpen
+        {
+            private set { }
+            get
+            {
+                try
+                {
+                    var wnd = RemoteWindowHandle;
+                }
+                catch (Exception.RemoteWindowNotFoundException)
+                {
+                    return false;
+                }
+
+                return true;
             }
         }
         /// <summary>
@@ -359,20 +376,28 @@ namespace GaoLib.Api.Aimp
 
         //誰か氏～～～～～～～～ｗｗｗｗｗｗｗｗ誰か氏僕の代わりに<summary>付けてくれ～～～～～～ｗｗｗｗｗｗｗｗｗｗ
         #region コマンド各種
-        public static void Open()
+        public static void Show()
         {
-            var filePath = ((string)Microsoft.Win32.Registry.GetValue("HKEY_CLASSES_ROOT\\Applications\\AIMP3.exe\\shell\\open\\command", null, null)).Split(new char[] { '"' })[1];
-            if (String.IsNullOrEmpty(filePath))
+            _Show();
+        }
+        public static void ShowSync(int delay = 100)
+        {
+            using (var p = _Show())
             {
-                throw new FileNotFoundException("AIMP3.exeが見つかりませんでした。インストールされてない可能性があります");
-            }
-            var fileInfo = new FileInfo(filePath);
-            if (!fileInfo.Exists)
-            {
-                throw new FileNotFoundException("AIMP3.exeが見つかりませんでした。ファイルが移動したか、削除された可能性があります");
-            }
+                // アイドル状態を待つといったな？
+                p.WaitForInputIdle();
 
-            Process.Start(filePath);
+                // アレは嘘だ。正しくはこれも書かなければならない。
+                while (p.MainWindowHandle == IntPtr.Zero && p.HasExited == false)
+                {
+                    System.Threading.Thread.Sleep(1);
+                    p.Refresh();
+                }
+
+                // アイドル移行直後に完了してしまうと、Playerの状態が不安定っぽいので、多少多めにdelayを挟むといい
+                // 闇コードなのでいい解決方法探してるとこ。うーむ。
+                System.Threading.Thread.Sleep(delay);
+            }
         }
         public static void Play()
         {
@@ -398,7 +423,7 @@ namespace GaoLib.Api.Aimp
         {
             PostCommand(Core.Command.PREV);
         }
-        public static void Quit()
+        public static void Close()
         {
             PostCommand(Core.Command.QUIT);
         }
@@ -448,7 +473,25 @@ namespace GaoLib.Api.Aimp
         }
         #endregion
 
-        #region SendMessageラッパー各種
+        #region 補助用のprivateメソッド各種
+        private static Process _Show()
+        {
+            var filePath = ((string)Microsoft.Win32.Registry.GetValue("HKEY_CLASSES_ROOT\\Applications\\AIMP3.exe\\shell\\open\\command", null, null)).Split(new char[] { '"' })[1];
+            if (String.IsNullOrEmpty(filePath))
+            {
+                throw new FileNotFoundException("AIMP3.exeが見つかりませんでした。インストールされてない可能性があります");
+            }
+            var fileInfo = new FileInfo(filePath);
+            if (!fileInfo.Exists)
+            {
+                throw new FileNotFoundException("AIMP3.exeが見つかりませんでした。ファイルが移動したか、削除された可能性があります");
+            }
+            var psi = new ProcessStartInfo();
+            psi.FileName = filePath;
+            psi.UseShellExecute = false;
+
+            return Process.Start(psi);
+        }
         private static IntPtr GetProperty(uint propId)
         {
             return SendProperty(propId, Core.PropValue.GET, IntPtr.Zero);
