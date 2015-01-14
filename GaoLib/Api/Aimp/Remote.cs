@@ -488,28 +488,28 @@ namespace GaoLib.Api.Aimp
             PostCommand(Core.Command.VISUAL_STOP);
         }
         /// <summary>
-        /// プレイリストにファイルを指定して追加するダイアログを開きます。
+        /// 現在のプレイリストにファイルを指定して追加するダイアログを開きます。
         /// </summary>
         public static void AddFile()
         {
             PostCommand(Core.Command.ADD_FILES);
         }
         /// <summary>
-        /// プレイリストにフォルダを指定して追加するダイアログを開きます。
+        /// 現在のプレイリストにフォルダを指定して追加するダイアログを開きます。
         /// </summary>
         public static void AddDirectory()
         {
             PostCommand(Core.Command.ADD_FOLDERS);
         }
         /// <summary>
-        /// プレイリストにプレイリストを指定して追加するダイアログを開きます。
+        /// 現在のプレイリストにプレイリストを指定して追加するダイアログを開きます。
         /// </summary>
         public static void AddPlaylist()
         {
             PostCommand(Core.Command.ADD_PLAYLISTS);
         }
         /// <summary>
-        /// プレイリストにURIを指定して追加するダイアログを開きます。
+        /// 現在のプレイリストにURIを指定して追加するダイアログを開きます。
         /// </summary>
         public static void AddUri()
         {
