@@ -14,6 +14,10 @@ namespace Sample{
     {
       try
       {
+          if (!Aimp::Remote.IsRunning)
+          {
+              Aimp::Remote.RunSync();
+          }
           //再生
           Aimp::Remote.Play();
           //一時停止
@@ -41,6 +45,7 @@ namespace Sample{
       }
       catch (Aimp::Exception.RemoteWindowNotFoundException)
       {
+          // このサンプルプログラムでは(恐らく)到達しない、はず。
           Console.WriteLine("AIMPを起動してない時に発生するエラーの処理");
       }
       catch (Aimp::Exception.AimpException)
