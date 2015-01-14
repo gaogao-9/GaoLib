@@ -2,7 +2,7 @@
 C#向けの、自分用便利なアレこれをまとめた奴のソースコード
 
 ### AIMP APIのサンプルコード
-  cs
+```cs
 using System;
 using System.IO;
 using Aimp = GaoLib.Api.Aimp;
