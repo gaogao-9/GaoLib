@@ -376,10 +376,17 @@ namespace GaoLib.Api.Aimp
 
         //誰か氏～～～～～～～～ｗｗｗｗｗｗｗｗ誰か氏僕の代わりに<summary>付けてくれ～～～～～～ｗｗｗｗｗｗｗｗｗｗ
         #region コマンド各種
+        /// <summary>
+        /// AIMPを非同期的に起動します。
+        /// </summary>
         public static void Run()
         {
             _Run();
         }
+        /// <summary>
+        /// AIMPを同期的に起動します。
+        /// </summary>
+        /// <param name="delay">遅延時間。少し付けとくと起動直後の不安定さが緩和される</param>
         public static void RunSync(int delay = 100)
         {
             using (var p = _Run())
@@ -399,74 +406,132 @@ namespace GaoLib.Api.Aimp
                 System.Threading.Thread.Sleep(delay);
             }
         }
+        /// <summary>
+        /// アクティブな曲を再生します。
+        /// </summary>
         public static void Play()
         {
             PostCommand(Core.Command.PLAY);
         }
+        /// <summary>
+        /// <para>アクティブな曲の再生状態を切り替えます。</para>
+        /// <para>【現状態】⇒【次状態】</para>
+        /// <para>再生中⇒一時停止</para>
+        /// <para>一時停止中⇒再生</para>
+        /// <para>停止中⇒再生</para>
+        /// </summary>
         public static void PlayPause()
         {
             PostCommand(Core.Command.PLAYPAUSE);
         }
+        /// <summary>
+        /// アクティブな曲を一時停止します。
+        /// </summary>
         public static void Pause()
         {
             PostCommand(Core.Command.PAUSE);
         }
+        /// <summary>
+        /// アクティブな曲を停止します。
+        /// </summary>
         public static void Stop()
         {
             PostCommand(Core.Command.STOP);
         }
+        /// <summary>
+        /// プレイリストの次の曲へ移動します。
+        /// </summary>
         public static void Next()
         {
             PostCommand(Core.Command.NEXT);
         }
+        /// <summary>
+        /// プレイリストの前の曲へ移動します。
+        /// </summary>
         public static void Prev()
         {
             PostCommand(Core.Command.PREV);
         }
+        /// <summary>
+        /// AIMPを終了します。
+        /// </summary>
         public static void Close()
         {
             PostCommand(Core.Command.QUIT);
         }
+        /// <summary>
+        /// 次の視覚エフェクトへ移動します。
+        /// </summary>
         public static void VisualNext()
         {
             PostCommand(Core.Command.VISUAL_NEXT);
         }
+        /// <summary>
+        /// 前の視覚エフェクトへ移動します。
+        /// </summary>
         public static void VisualPrev()
         {
             PostCommand(Core.Command.VISUAL_PREV);
         }
+        /// <summary>
+        /// 視覚エフェクトを表示します。
+        /// </summary>
         public static void VisualStart()
         {
             PostCommand(Core.Command.VISUAL_START);
         }
+        /// <summary>
+        /// 視覚エフェクトを非表示にします。
+        /// </summary>
         public static void VisualStop()
         {
             PostCommand(Core.Command.VISUAL_STOP);
         }
+        /// <summary>
+        /// プレイリストにファイルを指定して追加するダイアログを開きます。
+        /// </summary>
         public static void AddFile()
         {
             PostCommand(Core.Command.ADD_FILES);
         }
+        /// <summary>
+        /// プレイリストにフォルダを指定して追加するダイアログを開きます。
+        /// </summary>
         public static void AddDirectory()
         {
             PostCommand(Core.Command.ADD_FOLDERS);
         }
+        /// <summary>
+        /// プレイリストにプレイリストを指定して追加するダイアログを開きます。
+        /// </summary>
         public static void AddPlaylist()
         {
             PostCommand(Core.Command.ADD_PLAYLISTS);
         }
+        /// <summary>
+        /// プレイリストにURIを指定して追加するダイアログを開きます。
+        /// </summary>
         public static void AddUri()
         {
             PostCommand(Core.Command.ADD_URL);
         }
+        /// <summary>
+        /// 現在のプレイリストを破棄して、新規にファイルを指定するダイアログを開きます。
+        /// </summary>
         public static void OpenFile()
         {
             PostCommand(Core.Command.OPEN_FILES);
         }
+        /// <summary>
+        /// 現在のプレイリストを破棄して、新規にフォルダを指定するダイアログを開きます。
+        /// </summary>
         public static void OpenDirectory()
         {
             PostCommand(Core.Command.OPEN_FOLDERS);
-        }
+        }        /// <summary>
+        /// 現在のプレイリストを破棄して、新規にプレイリストを指定するダイアログを開きます。
+        /// </summary>
+
         public static void OpenPlaylist()
         {
             PostCommand(Core.Command.OPEN_PLAYLISTS);
