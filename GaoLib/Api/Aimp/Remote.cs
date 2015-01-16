@@ -384,7 +384,7 @@ namespace GaoLib.Api.Aimp
             private set { }
             get
             {
-                if (SendCommand(Core.Command.GET_ALBUMART, RecieverWindowHandle) == IntPtr.Zero)
+                if (SendCommand(Core.Command.GetAlbumart, RecieverWindowHandle) == IntPtr.Zero)
                 {
                     return null;
                 }
@@ -434,7 +434,7 @@ namespace GaoLib.Api.Aimp
         /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
         public static void Play()
         {
-            PostCommand(Core.Command.PLAY);
+            PostCommand(Core.Command.Play);
         }
         /// <summary>
         /// <para>アクティブな曲の再生状態を切り替えます。</para>
@@ -447,7 +447,7 @@ namespace GaoLib.Api.Aimp
         /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
         public static void PlayPause()
         {
-            PostCommand(Core.Command.PLAYPAUSE);
+            PostCommand(Core.Command.PlayPause);
         }
         /// <summary>
         /// アクティブな曲を一時停止します。
@@ -456,7 +456,7 @@ namespace GaoLib.Api.Aimp
         /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
         public static void Pause()
         {
-            PostCommand(Core.Command.PAUSE);
+            PostCommand(Core.Command.Pause);
         }
         /// <summary>
         /// アクティブな曲を停止します。
@@ -465,7 +465,7 @@ namespace GaoLib.Api.Aimp
         /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
         public static void Stop()
         {
-            PostCommand(Core.Command.STOP);
+            PostCommand(Core.Command.Stop);
         }
         /// <summary>
         /// プレイリストの次の曲へ移動します。
@@ -474,7 +474,7 @@ namespace GaoLib.Api.Aimp
         /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
         public static void Next()
         {
-            PostCommand(Core.Command.NEXT);
+            PostCommand(Core.Command.Next);
         }
         /// <summary>
         /// プレイリストの前の曲へ移動します。
@@ -483,7 +483,7 @@ namespace GaoLib.Api.Aimp
         /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
         public static void Prev()
         {
-            PostCommand(Core.Command.PREV);
+            PostCommand(Core.Command.Prev);
         }
         /// <summary>
         /// AIMPを終了します。
@@ -492,7 +492,7 @@ namespace GaoLib.Api.Aimp
         /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
         public static void Close()
         {
-            PostCommand(Core.Command.QUIT);
+            PostCommand(Core.Command.Quit);
         }
         /// <summary>
         /// 次の視覚エフェクトへ移動します。
@@ -501,7 +501,7 @@ namespace GaoLib.Api.Aimp
         /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
         public static void VisualNext()
         {
-            PostCommand(Core.Command.VISUAL_NEXT);
+            PostCommand(Core.Command.VisualNext);
         }
         /// <summary>
         /// 前の視覚エフェクトへ移動します。
@@ -510,7 +510,7 @@ namespace GaoLib.Api.Aimp
         /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
         public static void VisualPrev()
         {
-            PostCommand(Core.Command.VISUAL_PREV);
+            PostCommand(Core.Command.VisualPrev);
         }
         /// <summary>
         /// 視覚エフェクトを表示します。
@@ -519,7 +519,7 @@ namespace GaoLib.Api.Aimp
         /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
         public static void VisualStart()
         {
-            PostCommand(Core.Command.VISUAL_START);
+            PostCommand(Core.Command.VisualStart);
         }
         /// <summary>
         /// 視覚エフェクトを非表示にします。
@@ -528,7 +528,7 @@ namespace GaoLib.Api.Aimp
         /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
         public static void VisualStop()
         {
-            PostCommand(Core.Command.VISUAL_STOP);
+            PostCommand(Core.Command.VisualStop);
         }
         /// <summary>
         /// 現在のプレイリストにファイルを指定して追加するダイアログを開きます。
@@ -537,7 +537,7 @@ namespace GaoLib.Api.Aimp
         /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
         public static void AddFile()
         {
-            PostCommand(Core.Command.ADD_FILES);
+            PostCommand(Core.Command.AddFiles);
         }
         /// <summary>
         /// 現在のプレイリストにフォルダを指定して追加するダイアログを開きます。
@@ -546,7 +546,7 @@ namespace GaoLib.Api.Aimp
         /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
         public static void AddDirectory()
         {
-            PostCommand(Core.Command.ADD_FOLDERS);
+            PostCommand(Core.Command.AddFolders);
         }
         /// <summary>
         /// 現在のプレイリストにプレイリストを指定して追加するダイアログを開きます。
@@ -555,7 +555,7 @@ namespace GaoLib.Api.Aimp
         /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
         public static void AddPlaylist()
         {
-            PostCommand(Core.Command.ADD_PLAYLISTS);
+            PostCommand(Core.Command.AddPlaylists);
         }
         /// <summary>
         /// 現在のプレイリストにURIを指定して追加するダイアログを開きます。
@@ -564,7 +564,7 @@ namespace GaoLib.Api.Aimp
         /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
         public static void AddUri()
         {
-            PostCommand(Core.Command.ADD_URL);
+            PostCommand(Core.Command.AddUrl);
         }
         /// <summary>
         /// 現在のプレイリストを破棄して、新規にファイルを指定するダイアログを開きます。
@@ -573,7 +573,7 @@ namespace GaoLib.Api.Aimp
         /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
         public static void OpenFile()
         {
-            PostCommand(Core.Command.OPEN_FILES);
+            PostCommand(Core.Command.OpenFiles);
         }
         /// <summary>
         /// 現在のプレイリストを破棄して、新規にフォルダを指定するダイアログを開きます。
@@ -582,7 +582,7 @@ namespace GaoLib.Api.Aimp
         /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
         public static void OpenDirectory()
         {
-            PostCommand(Core.Command.OPEN_FOLDERS);
+            PostCommand(Core.Command.OpenFolders);
         }        /// <summary>
         /// 現在のプレイリストを破棄して、新規にプレイリストを指定するダイアログを開きます。
         /// </summary>
@@ -590,7 +590,7 @@ namespace GaoLib.Api.Aimp
         /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
         public static void OpenPlaylist()
         {
-            PostCommand(Core.Command.OPEN_PLAYLISTS);
+            PostCommand(Core.Command.OpenPlaylists);
         }
 
         /// <summary>
@@ -606,7 +606,7 @@ namespace GaoLib.Api.Aimp
             IsNotify = true;
             Task.Run(() =>
             {
-                var res2 = SendCommand(Core.Command.REGISTER_NOTIFY, RecieverWindowHandle);
+                var res2 = SendCommand(Core.Command.RegisterNotify, RecieverWindowHandle);
                 NativeMethods.MessageStruct msg;
                 sbyte ret;
                 var sb = new StringBuilder();
@@ -648,7 +648,7 @@ namespace GaoLib.Api.Aimp
             if (!IsNotify) return;
             IsNotify = false;
 
-            PostCommand(Core.Command.UNREGISTER_NOTIFY, RecieverWindowHandle);
+            PostCommand(Core.Command.UnRegisterNotify, RecieverWindowHandle);
         }
         #endregion
 
