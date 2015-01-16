@@ -5,6 +5,7 @@ using System.IO.MemoryMappedFiles;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace GaoLib.Api.Aimp
 {
@@ -14,6 +15,7 @@ namespace GaoLib.Api.Aimp
         private static IntPtr _recieverWindowHandle = IntPtr.Zero;
         private static IntPtr _hInstance = IntPtr.Zero;
         private static byte[] _albumArt = null;
+        private static bool _isNotify = false;
 
         static Remote()
         {
@@ -24,8 +26,8 @@ namespace GaoLib.Api.Aimp
         /// <summary>
         /// (読み取り専用)AIMP側が提供するAPIにアクセスするために用意されたウインドウハンドル。
         /// 普段は直接触れなくてもいいはずです。
-        /// <exception cref="GaoLib.Api.Aimp.Exception.RemoteWindowNotFoundException"></exception>
         /// </summary>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.RemoteWindowNotFoundException"></exception>
         public static IntPtr RemoteWindowHandle
         {
             private set { }
@@ -46,6 +48,7 @@ namespace GaoLib.Api.Aimp
         /// <summary>
         /// 主にウインドウプロシジャを受け取るための見えないウインドウのウインドウハンドル。
         /// </summary>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.RecieverWindowException"></exception>
         private static IntPtr RecieverWindowHandle
         {
             set { }
@@ -66,16 +69,16 @@ namespace GaoLib.Api.Aimp
         #region プロパティ各種
         /// <summary>
         /// (読み取り専用)プレイヤーのバージョンを示すプロパティです。
-        /// <exception cref="GaoLib.Api.Aimp.Exception.RemoteWindowNotFoundException"></exception>
-        /// <exception cref="GaoLib.Api.Aimp.Exception.RecieverWindowException"></exception>
-        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageTimeoutException"></exception>
         /// </summary>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.RemoteWindowNotFoundException"></exception>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageTimeoutException"></exception>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
         public static VersionInfo Version
         {
             private set { }
             get
             {
-                return new VersionInfo(GetProperty(Core.Property.VERSION).ToInt32());
+                return new VersionInfo(GetProperty(Core.Property.Version).ToInt32());
             }
         }
         /// <summary>
@@ -99,60 +102,71 @@ namespace GaoLib.Api.Aimp
             }
         }
         /// <summary>
-        /// 曲の長さを示すプロパティです。単位は[ms]です。
-        /// <exception cref="GaoLib.Api.Aimp.Exception.RemoteWindowNotFoundException"></exception>
-        /// <exception cref="GaoLib.Api.Aimp.Exception.RecieverWindowException"></exception>
-        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageTimeoutException"></exception>
+        /// (読み取り専用)AIMPから継続的な通知を受けている状態にあるかどうかを示すプロパティです。
         /// </summary>
-        public static int Duration
+        public static bool IsNotify
         {
-            set
+            private set
             {
-                SetProperty(Core.Property.PLAYER_DURATION, new IntPtr(value));
+                _isNotify = value;
             }
             get
             {
-                return GetProperty(Core.Property.PLAYER_DURATION).ToInt32();
+                return _isNotify;
+            }
+        }
+        /// <summary>
+        /// (読み取り専用)曲の長さを示すプロパティです。単位は[ms]です。
+        /// </summary>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.RemoteWindowNotFoundException"></exception>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageTimeoutException"></exception>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
+        public static int Duration
+        {
+            private set { }
+            get
+            {
+                return GetProperty(Core.Property.Duration).ToInt32();
             }
         }
         /// <summary>
         /// 曲の再生位置を示すプロパティです。単位は[ms]です。
-        /// <exception cref="GaoLib.Api.Aimp.Exception.RemoteWindowNotFoundException"></exception>
-        /// <exception cref="GaoLib.Api.Aimp.Exception.RecieverWindowException"></exception>
-        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageTimeoutException"></exception>
         /// </summary>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.RemoteWindowNotFoundException"></exception>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageTimeoutException"></exception>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
         public static int Position
         {
             set
             {
-                SetProperty(Core.Property.PLAYER_POSITION, new IntPtr(value));
+                SetProperty(Core.Property.Position, new IntPtr(value));
             }
             get
             {
-                return GetProperty(Core.Property.PLAYER_POSITION).ToInt32();
+                return GetProperty(Core.Property.Position).ToInt32();
             }
         }
         /// <summary>
-        /// プレイヤーの再生状態を示すプロパティです。
-        /// <exception cref="GaoLib.Api.Aimp.Exception.RemoteWindowNotFoundException"></exception>
-        /// <exception cref="GaoLib.Api.Aimp.Exception.RecieverWindowException"></exception>
-        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageTimeoutException"></exception>
+        /// (読み取り専用)プレイヤーの再生状態を示すプロパティです。
         /// </summary>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.RemoteWindowNotFoundException"></exception>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageTimeoutException"></exception>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
         public static PlayerState State
         {
             private set { }
             get
             {
-                return (PlayerState)GetProperty(Core.Property.PLAYER_STATE).ToInt32();
+                return (PlayerState)GetProperty(Core.Property.State).ToInt32();
             }
         }
         /// <summary>
         /// 音量を示すプロパティです。値は0-100の範囲で、単位は[%]です。
+        /// </summary>
         /// <exception cref="System.ArgumentOutOfRangeException"></exception>
         /// <exception cref="GaoLib.Api.Aimp.Exception.RemoteWindowNotFoundException"></exception>
-        /// <exception cref="GaoLib.Api.Aimp.Exception.RecieverWindowException"></exception>
         /// <exception cref="GaoLib.Api.Aimp.Exception.MessageTimeoutException"></exception>
-        /// </summary>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
         public static int Volume
         {
             set
@@ -162,101 +176,102 @@ namespace GaoLib.Api.Aimp
                     new ArgumentOutOfRangeException("音量は0～100[%]の範囲で指定してください。");
                 }
                 var _volume = Math.Max(0, Math.Min(value, 100));
-                SetProperty(Core.Property.VOLUME, new IntPtr(_volume));
+                SetProperty(Core.Property.Volume, new IntPtr(_volume));
             }
             get
             {
-                return GetProperty(Core.Property.VOLUME).ToInt32();
+                return GetProperty(Core.Property.Volume).ToInt32();
             }
         }
         /// <summary>
         /// ミュート状態を示すプロパティです。
-        /// <exception cref="GaoLib.Api.Aimp.Exception.RemoteWindowNotFoundException"></exception>
-        /// <exception cref="GaoLib.Api.Aimp.Exception.RecieverWindowException"></exception>
-        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageTimeoutException"></exception>
         /// </summary>
-        public static bool Mute
+        /// <exception cref="GaoLib.Api.Aimp.Exception.RemoteWindowNotFoundException"></exception>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageTimeoutException"></exception>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
+        public static bool IsMute
         {
             set
             {
-                SetProperty(Core.Property.MUTE, new IntPtr(value ? 1 : 0));
+                SetProperty(Core.Property.IsMute, new IntPtr(value ? 1 : 0));
             }
             get
             {
-                return GetProperty(Core.Property.MUTE) != IntPtr.Zero;
+                return GetProperty(Core.Property.IsMute) != IntPtr.Zero;
             }
         }
         /// <summary>
         /// リピート再生を示すプロパティです。
-        /// <exception cref="GaoLib.Api.Aimp.Exception.RemoteWindowNotFoundException"></exception>
-        /// <exception cref="GaoLib.Api.Aimp.Exception.RecieverWindowException"></exception>
-        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageTimeoutException"></exception>
         /// </summary>
-        public static bool Repeat
+        /// <exception cref="GaoLib.Api.Aimp.Exception.RemoteWindowNotFoundException"></exception>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageTimeoutException"></exception>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
+        public static bool IsRepeat
         {
             set
             {
-                SetProperty(Core.Property.TRACK_REPEAT, new IntPtr(value ? 1 : 0));
+                SetProperty(Core.Property.IsRepeat, new IntPtr(value ? 1 : 0));
             }
             get
             {
-                return GetProperty(Core.Property.TRACK_REPEAT) != IntPtr.Zero;
+                return GetProperty(Core.Property.IsRepeat) != IntPtr.Zero;
             }
         }
         /// <summary>
         /// ランダム再生を示すプロパティです。
-        /// <exception cref="GaoLib.Api.Aimp.Exception.RemoteWindowNotFoundException"></exception>
-        /// <exception cref="GaoLib.Api.Aimp.Exception.RecieverWindowException"></exception>
-        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageTimeoutException"></exception>
         /// </summary>
-        public static bool Shuffle
+        /// <exception cref="GaoLib.Api.Aimp.Exception.RemoteWindowNotFoundException"></exception>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageTimeoutException"></exception>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
+        public static bool IsShuffle
         {
             set
             {
-                SetProperty(Core.Property.TRACK_SHUFFLE, new IntPtr(value ? 1 : 0));
+                SetProperty(Core.Property.IsShuffle, new IntPtr(value ? 1 : 0));
             }
             get
             {
-                return GetProperty(Core.Property.TRACK_SHUFFLE) != IntPtr.Zero;
+                return GetProperty(Core.Property.IsShuffle) != IntPtr.Zero;
             }
         }
         /// <summary>
         /// インターネットラジオ録音を示すプロパティです。
-        /// <exception cref="GaoLib.Api.Aimp.Exception.RemoteWindowNotFoundException"></exception>
-        /// <exception cref="GaoLib.Api.Aimp.Exception.RecieverWindowException"></exception>
-        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageTimeoutException"></exception>
         /// </summary>
-        public static bool RadioCapture
+        /// <exception cref="GaoLib.Api.Aimp.Exception.RemoteWindowNotFoundException"></exception>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageTimeoutException"></exception>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
+        public static bool IsRadioCapture
         {
             set
             {
-                SetProperty(Core.Property.RADIOCAP, new IntPtr(value ? 1 : 0));
+                SetProperty(Core.Property.IsRadioCapture, new IntPtr(value ? 1 : 0));
             }
             get
             {
-                return GetProperty(Core.Property.RADIOCAP) != IntPtr.Zero;
+                return GetProperty(Core.Property.IsRadioCapture) != IntPtr.Zero;
             }
         }
         /// <summary>
         /// 全画面表示を示すプロパティです。
-        /// <exception cref="GaoLib.Api.Aimp.Exception.RemoteWindowNotFoundException"></exception>
-        /// <exception cref="GaoLib.Api.Aimp.Exception.RecieverWindowException"></exception>
-        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageTimeoutException"></exception>
         /// </summary>
-        public static bool VisualFullScreen
+        /// <exception cref="GaoLib.Api.Aimp.Exception.RemoteWindowNotFoundException"></exception>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageTimeoutException"></exception>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
+        public static bool IsVisualFullScreen
         {
             set
             {
-                SetProperty(Core.Property.VISUAL_FULLSCREEN, new IntPtr(value ? 1 : 0));
+                SetProperty(Core.Property.IsVisualFullScreen, new IntPtr(value ? 1 : 0));
             }
             get
             {
-                return GetProperty(Core.Property.VISUAL_FULLSCREEN) != IntPtr.Zero;
+                return GetProperty(Core.Property.IsVisualFullScreen) != IntPtr.Zero;
             }
         }
         /// <summary>
         /// (読み取り専用)再生中の曲名やアーティスト名、ビットレートやサンプリングレート等々の情報を取得します。
         /// </summary>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.FileMappingException"></exception>
         public static MusicInfo MusicInfo
         {
             private set { }
@@ -348,11 +363,11 @@ namespace GaoLib.Api.Aimp
                 }
                 catch (FileNotFoundException)
                 {
-                    throw new Exception.RecieverWindowException("ファイルマッピング先を開くことが出来ませんでした");
+                    throw new Exception.FileMappingException("ファイルマッピング先を開くことが出来ませんでした");
                 }
                 catch (IOException)
                 {
-                    throw new Exception.RecieverWindowException("ファイルマッピングに失敗しました。");
+                    throw new Exception.FileMappingException("ファイルマッピングに失敗しました。");
                 }
                 return musicInfo;
             }
@@ -360,6 +375,10 @@ namespace GaoLib.Api.Aimp
         /// <summary>
         /// (読み取り専用)再生中のアルバムアートを取得します。
         /// </summary>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.RecieverWindowNotFoundException"></exception>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.RemoteWindowNotFoundException"></exception>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageTimeoutException"></exception>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
         public static byte[] AlbumArt
         {
             private set { }
@@ -374,11 +393,11 @@ namespace GaoLib.Api.Aimp
         }
         #endregion
 
-        //誰か氏～～～～～～～～ｗｗｗｗｗｗｗｗ誰か氏僕の代わりに<summary>付けてくれ～～～～～～ｗｗｗｗｗｗｗｗｗｗ
         #region コマンド各種
         /// <summary>
         /// AIMPを非同期的に起動します。
         /// </summary>
+        /// <exception cref="System.IO.FileNotFoundException"></exception>
         public static void Run()
         {
             _Run();
@@ -387,8 +406,10 @@ namespace GaoLib.Api.Aimp
         /// AIMPを同期的に起動します。
         /// </summary>
         /// <param name="delay">遅延時間。少し付けとくと起動直後の不安定さが緩和される</param>
+        /// <exception cref="System.IO.FileNotFoundException"></exception>
         public static void RunSync(int delay = 100)
         {
+
             using (var p = _Run())
             {
                 // アイドル状態を待つといったな？
@@ -409,6 +430,8 @@ namespace GaoLib.Api.Aimp
         /// <summary>
         /// アクティブな曲を再生します。
         /// </summary>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.RecieverWindowNotFoundException"></exception>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
         public static void Play()
         {
             PostCommand(Core.Command.PLAY);
@@ -420,6 +443,8 @@ namespace GaoLib.Api.Aimp
         /// <para>一時停止中⇒再生</para>
         /// <para>停止中⇒再生</para>
         /// </summary>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.RecieverWindowNotFoundException"></exception>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
         public static void PlayPause()
         {
             PostCommand(Core.Command.PLAYPAUSE);
@@ -427,6 +452,8 @@ namespace GaoLib.Api.Aimp
         /// <summary>
         /// アクティブな曲を一時停止します。
         /// </summary>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.RecieverWindowNotFoundException"></exception>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
         public static void Pause()
         {
             PostCommand(Core.Command.PAUSE);
@@ -434,6 +461,8 @@ namespace GaoLib.Api.Aimp
         /// <summary>
         /// アクティブな曲を停止します。
         /// </summary>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.RecieverWindowNotFoundException"></exception>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
         public static void Stop()
         {
             PostCommand(Core.Command.STOP);
@@ -441,6 +470,8 @@ namespace GaoLib.Api.Aimp
         /// <summary>
         /// プレイリストの次の曲へ移動します。
         /// </summary>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.RecieverWindowNotFoundException"></exception>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
         public static void Next()
         {
             PostCommand(Core.Command.NEXT);
@@ -448,6 +479,8 @@ namespace GaoLib.Api.Aimp
         /// <summary>
         /// プレイリストの前の曲へ移動します。
         /// </summary>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.RecieverWindowNotFoundException"></exception>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
         public static void Prev()
         {
             PostCommand(Core.Command.PREV);
@@ -455,6 +488,8 @@ namespace GaoLib.Api.Aimp
         /// <summary>
         /// AIMPを終了します。
         /// </summary>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.RecieverWindowNotFoundException"></exception>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
         public static void Close()
         {
             PostCommand(Core.Command.QUIT);
@@ -462,6 +497,8 @@ namespace GaoLib.Api.Aimp
         /// <summary>
         /// 次の視覚エフェクトへ移動します。
         /// </summary>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.RecieverWindowNotFoundException"></exception>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
         public static void VisualNext()
         {
             PostCommand(Core.Command.VISUAL_NEXT);
@@ -469,6 +506,8 @@ namespace GaoLib.Api.Aimp
         /// <summary>
         /// 前の視覚エフェクトへ移動します。
         /// </summary>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.RecieverWindowNotFoundException"></exception>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
         public static void VisualPrev()
         {
             PostCommand(Core.Command.VISUAL_PREV);
@@ -476,6 +515,8 @@ namespace GaoLib.Api.Aimp
         /// <summary>
         /// 視覚エフェクトを表示します。
         /// </summary>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.RecieverWindowNotFoundException"></exception>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
         public static void VisualStart()
         {
             PostCommand(Core.Command.VISUAL_START);
@@ -483,6 +524,8 @@ namespace GaoLib.Api.Aimp
         /// <summary>
         /// 視覚エフェクトを非表示にします。
         /// </summary>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.RecieverWindowNotFoundException"></exception>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
         public static void VisualStop()
         {
             PostCommand(Core.Command.VISUAL_STOP);
@@ -490,6 +533,8 @@ namespace GaoLib.Api.Aimp
         /// <summary>
         /// 現在のプレイリストにファイルを指定して追加するダイアログを開きます。
         /// </summary>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.RecieverWindowNotFoundException"></exception>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
         public static void AddFile()
         {
             PostCommand(Core.Command.ADD_FILES);
@@ -497,6 +542,8 @@ namespace GaoLib.Api.Aimp
         /// <summary>
         /// 現在のプレイリストにフォルダを指定して追加するダイアログを開きます。
         /// </summary>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.RecieverWindowNotFoundException"></exception>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
         public static void AddDirectory()
         {
             PostCommand(Core.Command.ADD_FOLDERS);
@@ -504,6 +551,8 @@ namespace GaoLib.Api.Aimp
         /// <summary>
         /// 現在のプレイリストにプレイリストを指定して追加するダイアログを開きます。
         /// </summary>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.RecieverWindowNotFoundException"></exception>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
         public static void AddPlaylist()
         {
             PostCommand(Core.Command.ADD_PLAYLISTS);
@@ -511,6 +560,8 @@ namespace GaoLib.Api.Aimp
         /// <summary>
         /// 現在のプレイリストにURIを指定して追加するダイアログを開きます。
         /// </summary>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.RecieverWindowNotFoundException"></exception>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
         public static void AddUri()
         {
             PostCommand(Core.Command.ADD_URL);
@@ -518,6 +569,8 @@ namespace GaoLib.Api.Aimp
         /// <summary>
         /// 現在のプレイリストを破棄して、新規にファイルを指定するダイアログを開きます。
         /// </summary>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.RecieverWindowNotFoundException"></exception>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
         public static void OpenFile()
         {
             PostCommand(Core.Command.OPEN_FILES);
@@ -525,16 +578,77 @@ namespace GaoLib.Api.Aimp
         /// <summary>
         /// 現在のプレイリストを破棄して、新規にフォルダを指定するダイアログを開きます。
         /// </summary>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.RecieverWindowNotFoundException"></exception>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
         public static void OpenDirectory()
         {
             PostCommand(Core.Command.OPEN_FOLDERS);
         }        /// <summary>
         /// 現在のプレイリストを破棄して、新規にプレイリストを指定するダイアログを開きます。
         /// </summary>
-
+        /// <exception cref="GaoLib.Api.Aimp.Exception.RecieverWindowNotFoundException"></exception>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
         public static void OpenPlaylist()
         {
             PostCommand(Core.Command.OPEN_PLAYLISTS);
+        }
+
+        /// <summary>
+        /// 各種通知登録を開始します
+        /// </summary>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.RecieverWindowNotFoundException"></exception>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.RemoteWindowNotFoundException"></exception>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageTimeoutException"></exception>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
+        public static void ResisterNotify()
+        {
+            if (IsNotify) return;
+            IsNotify = true;
+            Task.Run(() =>
+            {
+                var res2 = SendCommand(Core.Command.REGISTER_NOTIFY, RecieverWindowHandle);
+                NativeMethods.MessageStruct msg;
+                sbyte ret;
+                var sb = new StringBuilder();
+                while ((ret = NativeMethods.GetMessage(out msg, RecieverWindowHandle, Core.WindowMessages.NOTIFY, Core.WindowMessages.NOTIFY)) != 0)
+                {
+                    if (!IsRunning) break;
+
+                    var notify = (Core.Notify)msg.wParam.ToUInt32();
+
+                    sb.Clear();
+                    sb.Append(DateTime.UtcNow.Ticks);
+                    sb.Append(' ');
+                    sb.Append(Enum.GetName(typeof(Core.Notify), notify).ToLower());
+                    switch (notify)
+                    {
+                        case Core.Notify.Property:
+                            sb.Append(' ');
+                            sb.Append(Enum.GetName(typeof(Core.Property), msg.lParam.ToUInt32()).ToLower());
+                            break;
+                        case Core.Notify.TrackInfo:
+                            sb.Append(' ');
+                            sb.Append(msg.lParam.ToUInt32().ToString().ToLower());
+                            break;
+                    }
+
+                    Console.WriteLine(sb);
+                }
+            });
+        }
+
+        /// <summary>
+        /// 各種通知登録を解除します。
+        /// </summary>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.RecieverWindowNotFoundException"></exception>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.RemoteWindowNotFoundException"></exception>
+        /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
+        public static void UnResisterNotify()
+        {
+            if (!IsNotify) return;
+            IsNotify = false;
+
+            PostCommand(Core.Command.UNREGISTER_NOTIFY, RecieverWindowHandle);
         }
         #endregion
 
@@ -557,14 +671,59 @@ namespace GaoLib.Api.Aimp
 
             return Process.Start(psi);
         }
-        private static IntPtr GetProperty(uint propId)
+
+        /// <summary>
+        /// 初回利用時に、受信用の見えないウインドウを作成します。
+        /// </summary>
+        private static IntPtr CreateRecieverWindow()
         {
-            return SendProperty(propId, Core.PropValue.GET, IntPtr.Zero);
+            var className = "AIMPRemoteRecieverWindow{35476947-77B0-45DA-B648-062B0C0DB63F}";
+            var wndClass = new NativeMethods.WindowClass();
+            wndClass.lpfnWndProc = new NativeMethods.WndProc((hWnd, msg, wp, lp) =>
+            {
+                switch (msg)
+                {
+                    case Win32.WindowMessages.COPYDATA:
+                        _albumArt = null;
+                        var cds = new NativeMethods.CopyDataStruct();
+                        cds = Marshal.PtrToStructure<NativeMethods.CopyDataStruct>(lp);
+                        if (cds.dwData != new IntPtr(Core.WindowMessages.COPYDATA_COVER_ID)) break;
+                        _albumArt = new byte[cds.cbData];
+                        Marshal.Copy(cds.lpData, _albumArt, 0, (int)cds.cbData);
+                        break;
+                }
+                return NativeMethods.DefWindowProc(hWnd, msg, wp, lp);
+            });
+            wndClass.cbClsExtra = wndClass.cbWndExtra = 0;
+            wndClass.hInstance = _hInstance;
+            wndClass.lpszMenuName = null;
+            wndClass.lpszClassName = className;
+
+            var classAtom = NativeMethods.RegisterClass(ref wndClass);
+
+            if (classAtom == 0)
+            {
+                throw new Exception.RecieverWindowException("ウィンドウクラス名の登録に失敗しました");
+            }
+
+            return NativeMethods.CreateWindowEx(
+                Win32.WindowStylesEx.WS_EX_LEFT,
+                classAtom,
+                "AIMPRemoteRecieverWindow",
+                Win32.WindowStyles.WS_OVERLAPPEDWINDOW,
+                0, 0, 100, 100,
+                IntPtr.Zero, IntPtr.Zero, _hInstance, IntPtr.Zero
+            );
         }
 
-        private static IntPtr SetProperty(uint propId, IntPtr value)
+        private static IntPtr GetProperty(Core.Property propId)
         {
-            return SendProperty(propId, Core.PropValue.SET, value);
+            return SendProperty((uint)propId, Core.PropValue.GET, IntPtr.Zero);
+        }
+
+        private static IntPtr SetProperty(Core.Property propId, IntPtr value)
+        {
+            return SendProperty((uint)propId, Core.PropValue.SET, value);
         }
 
         private static IntPtr SendProperty(uint propId, uint mode, IntPtr value)
@@ -636,50 +795,6 @@ namespace GaoLib.Api.Aimp
         #endregion
 
         /// <summary>
-        /// 初回利用時に、受信用の見えないウインドウを作成します。
-        /// </summary>
-        private static IntPtr CreateRecieverWindow()
-        {
-            var className = "AIMPRemoteRecieverWindow{35476947-77B0-45DA-B648-062B0C0DB63F}";
-            var wndClass = new NativeMethods.WindowClass();
-            wndClass.lpfnWndProc = new NativeMethods.WndProc((hWnd, msg, wp, lp) =>
-            {
-                switch (msg)
-                {
-                    case Win32.WindowMessages.COPYDATA:
-                        _albumArt = null;
-                        var cds = new NativeMethods.CopyDataStruct();
-                        cds = Marshal.PtrToStructure<NativeMethods.CopyDataStruct>(lp);
-                        if (cds.dwData != new IntPtr(Core.WindowMessages.COPYDATA_COVER_ID)) break;
-                        _albumArt = new byte[cds.cbData];
-                        Marshal.Copy(cds.lpData, _albumArt, 0, (int)cds.cbData);
-                        break;
-                }
-                return NativeMethods.DefWindowProc(hWnd, msg, wp, lp);
-            });
-            wndClass.cbClsExtra = wndClass.cbWndExtra = 0;
-            wndClass.hInstance = _hInstance;
-            wndClass.lpszMenuName = null;
-            wndClass.lpszClassName = className;
-
-            var classAtom = NativeMethods.RegisterClass(ref wndClass);
-
-            if (classAtom == 0)
-            {
-                throw new Exception.RecieverWindowException("ウィンドウクラス名の登録に失敗しました");
-            }
-
-            return NativeMethods.CreateWindowEx(
-                Win32.WindowStylesEx.WS_EX_LEFT,
-                classAtom,
-                "AIMPRemoteRecieverWindow",
-                Win32.WindowStyles.WS_OVERLAPPEDWINDOW,
-                0, 0, 100, 100,
-                IntPtr.Zero, IntPtr.Zero, _hInstance, IntPtr.Zero
-            );
-        }
-
-        /// <summary>
         /// Win32API関係のメソッドはここに打ち込むのが一般的らしい
         /// </summary>
         private static class NativeMethods
@@ -705,6 +820,30 @@ namespace GaoLib.Api.Aimp
                 public string lpszMenuName;
                 [MarshalAs(UnmanagedType.LPTStr)]
                 public string lpszClassName;
+            }
+
+            /// <summary>
+            /// 座標構造体
+            /// </summary>
+            [StructLayout(LayoutKind.Sequential)]
+            public struct PointStruct
+            {
+                public Int32 x;
+                public Int32 Y;
+            }
+
+            /// <summary>
+            /// メッセージ構造体
+            /// </summary>
+            [StructLayout(LayoutKind.Sequential)]
+            public struct MessageStruct
+            {
+                public IntPtr hwnd;
+                public Win32.WindowMessages message;
+                public UIntPtr wParam;
+                public UIntPtr lParam;
+                public UInt32 time;
+                public PointStruct pt;
             }
 
             /// <summary>
@@ -850,6 +989,17 @@ namespace GaoLib.Api.Aimp
             /// <returns>WindowProcedureに対する戻り値</returns>
             [DllImport("user32.dll")]
             public static extern IntPtr DefWindowProc(IntPtr hWnd, Win32.WindowMessages uMsg, IntPtr wParam, IntPtr lParam);
+
+            /// <summary>
+            /// 指定したウインドウに届いたウインドウメッセージを取得します。メッセージループとともに使います。
+            /// </summary>
+            /// <param name="lpMsg">受け取るウインドウメッセージ情報が入ったメッセージ構造体</param>
+            /// <param name="hWnd">対象となるウインドウハンドル</param>
+            /// <param name="wMsgFilterMin">受け取るウインドウメッセージの下限値</param>
+            /// <param name="wMsgFilterMax">受け取るウインドウメッセージの上限値</param>
+            /// <returns></returns>
+            [DllImport("user32.dll")]
+            public static extern sbyte GetMessage(out MessageStruct lpMsg, IntPtr hWnd, uint wMsgFilterMin, uint wMsgFilterMax);
         }
     }
 }

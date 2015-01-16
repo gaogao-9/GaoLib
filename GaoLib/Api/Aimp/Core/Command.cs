@@ -6,16 +6,16 @@
         /// コマンドの基本値です。
         /// 外部から見える必要はないです。
         /// </summary>
-        private const int BASE = 10;
+        private const uint BASE = 10;
 
         /// <summary>
         /// 通知登録を行うことを示すコマンドです。
         /// </summary>
-        public const uint RESISTER_NOTIFY = Command.BASE + 1;
+        public const uint REGISTER_NOTIFY = Command.BASE + 1;
         /// <summary>
         /// 通知解除を行うことを示すコマンドです。
         /// </summary>
-        public const uint UNRESISTER_NOTIFY = Command.BASE + 2;
+        public const uint UNREGISTER_NOTIFY = Command.BASE + 2;
 
         /// <summary>
         /// 再生を行うことを示すコマンドです。
