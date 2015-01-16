@@ -384,7 +384,7 @@ namespace GaoLib.Api.Aimp
             private set { }
             get
             {
-                if(SendCommand(Core.Command.GET_ALBUMART,RecieverWindowHandle) == IntPtr.Zero)
+                if (SendCommand(Core.Command.GET_ALBUMART, RecieverWindowHandle) == IntPtr.Zero)
                 {
                     return null;
                 }
@@ -622,14 +622,14 @@ namespace GaoLib.Api.Aimp
                     sb.Append(Enum.GetName(typeof(Core.Notify), notify).ToLower());
                     switch (notify)
                     {
-                        case Core.Notify.Property:
-                            sb.Append(' ');
-                            sb.Append(Enum.GetName(typeof(Core.Property), msg.lParam.ToUInt32()).ToLower());
-                            break;
-                        case Core.Notify.TrackInfo:
-                            sb.Append(' ');
-                            sb.Append(msg.lParam.ToUInt32().ToString().ToLower());
-                            break;
+                    case Core.Notify.Property:
+                        sb.Append(' ');
+                        sb.Append(Enum.GetName(typeof(Core.Property), msg.lParam.ToUInt32()).ToLower());
+                        break;
+                    case Core.Notify.TrackInfo:
+                        sb.Append(' ');
+                        sb.Append(msg.lParam.ToUInt32().ToString().ToLower());
+                        break;
                     }
 
                     Console.WriteLine(sb);
@@ -683,14 +683,14 @@ namespace GaoLib.Api.Aimp
             {
                 switch (msg)
                 {
-                    case Win32.WindowMessages.COPYDATA:
-                        _albumArt = null;
-                        var cds = new NativeMethods.CopyDataStruct();
-                        cds = Marshal.PtrToStructure<NativeMethods.CopyDataStruct>(lp);
-                        if (cds.dwData != new IntPtr((uint)Core.WindowMessages.CopyDataCoverId)) break;
-                        _albumArt = new byte[cds.cbData];
-                        Marshal.Copy(cds.lpData, _albumArt, 0, (int)cds.cbData);
-                        break;
+                case Win32.WindowMessages.COPYDATA:
+                    _albumArt = null;
+                    var cds = new NativeMethods.CopyDataStruct();
+                    cds = Marshal.PtrToStructure<NativeMethods.CopyDataStruct>(lp);
+                    if (cds.dwData != new IntPtr((uint)Core.WindowMessages.CopyDataCoverId)) break;
+                    _albumArt = new byte[cds.cbData];
+                    Marshal.Copy(cds.lpData, _albumArt, 0, (int)cds.cbData);
+                    break;
                 }
                 return NativeMethods.DefWindowProc(hWnd, msg, wp, lp);
             });
