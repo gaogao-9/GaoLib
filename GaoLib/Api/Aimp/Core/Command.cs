@@ -1,102 +1,96 @@
 ﻿namespace GaoLib.Api.Aimp.Core
 {
-    public static class Command
+    public enum Command : uint
     {
-        /// <summary>
-        /// コマンドの基本値です。
-        /// 外部から見える必要はないです。
-        /// </summary>
-        private const uint BASE = 10;
-
         /// <summary>
         /// 通知登録を行うことを示すコマンドです。
         /// </summary>
-        public const uint REGISTER_NOTIFY = Command.BASE + 1;
+        REGISTER_NOTIFY = 11,
         /// <summary>
         /// 通知解除を行うことを示すコマンドです。
         /// </summary>
-        public const uint UNREGISTER_NOTIFY = Command.BASE + 2;
+        UNREGISTER_NOTIFY = 12,
 
         /// <summary>
         /// 再生を行うことを示すコマンドです。
         /// </summary>
-        public const uint PLAY = Command.BASE + 3;
+        PLAY = 13,
         /// <summary>
         /// 再生と一時停止の切り替えを行うことを示すコマンドです。
         /// </summary>
-        public const uint PLAYPAUSE = Command.BASE + 4;
+        PLAYPAUSE = 14,
         /// <summary>
         /// 一時停止を行うことを示すコマンドです。
         /// </summary>
-        public const uint PAUSE = Command.BASE + 5;
+        PAUSE = 15,
         /// <summary>
         /// 停止を行うことを示すコマンドです。
         /// </summary>
-        public const uint STOP = Command.BASE + 6;
+        STOP = 16,
         /// <summary>
         /// 次の曲へ移動を行うことを示すコマンドです。
         /// </summary>
-        public const uint NEXT = Command.BASE + 7;
+        NEXT = 17,
         /// <summary>
         /// 前の曲へ移動を行うことを示すコマンドです。
         /// </summary>
-        public const uint PREV = Command.BASE + 8;
+        PREV = 18,
         /// <summary>
         /// AIMPの終了を行うことを示すコマンドです。
         /// </summary>
-        public const uint QUIT = Command.BASE + 11;
+        QUIT = 21,
 
         /// <summary>
         /// 次の視覚効果へ移動を行うことを示すコマンドです。
         /// </summary>
-        public const uint VISUAL_NEXT = Command.BASE + 9;
+        VISUAL_NEXT = 19,
         /// <summary>
         /// 前の視覚効果へ移動を行うことを示すコマンドです。
         /// </summary>
-        public const uint VISUAL_PREV = Command.BASE + 10;
+        VISUAL_PREV = 20,
         /// <summary>
         /// 視覚効果の開始を行うことを示すコマンドです。
         /// </summary>
-        public const uint VISUAL_START = Command.BASE + 20;
+        VISUAL_START = 30,
         /// <summary>
         /// 視覚効果の停止を行うことを示すコマンドです。
         /// </summary>
-        public const uint VISUAL_STOP = Command.BASE + 21;
+        VISUAL_STOP = 31,
 
         /// <summary>
         /// ファイル追加ダイアログの表示を行うことを示すコマンドです。
         /// </summary>
-        public const uint ADD_FILES = Command.BASE + 12;
+        ADD_FILES = 22,
         /// <summary>
         /// フォルダ追加ダイアログの表示を行うことを示すコマンドです。
         /// </summary>
-        public const uint ADD_FOLDERS = Command.BASE + 13;
+        ADD_FOLDERS = 23,
         /// <summary>
         /// プレイリスト追加ダイアログの表示を行うことを示すコマンドです。
         /// </summary>
-        public const uint ADD_PLAYLISTS = Command.BASE + 14;
+        ADD_PLAYLISTS = 24,
         /// <summary>
         /// URL追加ダイアログの表示を行うことを示すコマンドです。
         /// </summary>
-        public const uint ADD_URL = Command.BASE + 15;
+        ADD_URL = 25,
 
         /// <summary>
         /// ファイル展開ダイアログの表示を行うことを示すコマンドです。
         /// </summary>
-        public const uint OPEN_FILES = Command.BASE + 16;
+        OPEN_FILES = 26,
         /// <summary>
         /// フォルダ展開ダイアログの表示を行うことを示すコマンドです。
         /// </summary>
-        public const uint OPEN_FOLDERS = Command.BASE + 17;
+        OPEN_FOLDERS = 27,
         /// <summary>
         /// プレイリスト展開ダイアログの表示を行うことを示すコマンドです。
         /// </summary>
-        public const uint OPEN_PLAYLISTS = Command.BASE + 18;
+        OPEN_PLAYLISTS = 28,
 
         /// <summary>
         /// アルバムアートを取得することを示すコマンドです。
         /// このコマンドは32bitアプリケーションでのみ動作します。
         /// </summary>
-        public const uint GET_ALBUMART = Command.BASE + 19;
+        GET_ALBUMART = 29,
     }
 }

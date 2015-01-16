@@ -610,7 +610,7 @@ namespace GaoLib.Api.Aimp
                 NativeMethods.MessageStruct msg;
                 sbyte ret;
                 var sb = new StringBuilder();
-                while ((ret = NativeMethods.GetMessage(out msg, RecieverWindowHandle, Core.WindowMessages.NOTIFY, Core.WindowMessages.NOTIFY)) != 0)
+                while ((ret = NativeMethods.GetMessage(out msg, RecieverWindowHandle, (uint)Core.WindowMessages.Notify, (uint)Core.WindowMessages.Notify)) != 0)
                 {
                     if (!IsRunning) break;
 
@@ -687,7 +687,7 @@ namespace GaoLib.Api.Aimp
                         _albumArt = null;
                         var cds = new NativeMethods.CopyDataStruct();
                         cds = Marshal.PtrToStructure<NativeMethods.CopyDataStruct>(lp);
-                        if (cds.dwData != new IntPtr(Core.WindowMessages.COPYDATA_COVER_ID)) break;
+                        if (cds.dwData != new IntPtr((uint)Core.WindowMessages.CopyDataCoverId)) break;
                         _albumArt = new byte[cds.cbData];
                         Marshal.Copy(cds.lpData, _albumArt, 0, (int)cds.cbData);
                         break;
@@ -718,32 +718,32 @@ namespace GaoLib.Api.Aimp
 
         private static IntPtr GetProperty(Core.Property propId)
         {
-            return SendProperty((uint)propId, Core.PropValue.GET, IntPtr.Zero);
+            return SendProperty((uint)propId, (uint)Core.PropValue.Get, IntPtr.Zero);
         }
 
         private static IntPtr SetProperty(Core.Property propId, IntPtr value)
         {
-            return SendProperty((uint)propId, Core.PropValue.SET, value);
+            return SendProperty((uint)propId, (uint)Core.PropValue.Set, value);
         }
 
         private static IntPtr SendProperty(uint propId, uint mode, IntPtr value)
         {
             return Remote.SendMessage(
-                Core.WindowMessages.PROPERTY,
+                (uint)Core.WindowMessages.Property,
                 new IntPtr(propId | mode),
                 value);
         }
 
-        private static void SendCommand(uint commandId)
+        private static void SendCommand(Core.Command commandId)
         {
             SendCommand(commandId, IntPtr.Zero);
         }
 
-        private static IntPtr SendCommand(uint commandId, IntPtr value)
+        private static IntPtr SendCommand(Core.Command commandId, IntPtr value)
         {
             return Remote.SendMessage(
-                Core.WindowMessages.COMMAND,
-                new IntPtr(commandId),
+                (uint)Core.WindowMessages.Command,
+                new IntPtr((uint)commandId),
                 value);
         }
 
@@ -772,16 +772,16 @@ namespace GaoLib.Api.Aimp
             return output;
         }
 
-        private static void PostCommand(uint commandId)
+        private static void PostCommand(Core.Command commandId)
         {
             PostCommand(commandId, IntPtr.Zero);
         }
 
-        private static void PostCommand(uint commandId, IntPtr value)
+        private static void PostCommand(Core.Command commandId, IntPtr value)
         {
             PostMessage(
-                Core.WindowMessages.COMMAND,
-                new IntPtr(commandId),
+                (uint)Core.WindowMessages.Command,
+                new IntPtr((uint)commandId),
                 value);
         }
 
