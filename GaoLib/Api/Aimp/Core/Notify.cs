@@ -4,7 +4,7 @@
     /// 通知の種類を示します。
     /// CommandのRESISTER_NOTIFYを用いて、通知登録をした際、飛んでくる通知の種類の判定に使います。
     /// </summary>
-    public enum Notify : int
+    public enum Notify : uint
     {
         /// <summary>
         /// <para>再生中の楽曲情報が変更されたことを示す通知です。</para>
@@ -22,5 +22,10 @@
         /// <para>[wp:不使用,lp:PropertyのID,res:不使用]</para>
         /// </summary>
         Property = 3,
+        /// <summary>
+        /// <para>APIが独自に伝える通知です。</para>
+        /// <para>[wp:不使用,lp:不使用,res:不使用]</para>
+        /// </summary>
+        Remote = 0xFFFF0000,
     }
 }

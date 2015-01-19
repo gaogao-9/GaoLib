@@ -5,6 +5,7 @@ using System.IO.MemoryMappedFiles;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace GaoLib.Api.Aimp
@@ -95,6 +96,7 @@ namespace GaoLib.Api.Aimp
                 }
                 catch (Exception.RemoteWindowNotFoundException)
                 {
+                    _remoteWindowHandle = IntPtr.Zero;
                     return false;
                 }
 
@@ -600,41 +602,121 @@ namespace GaoLib.Api.Aimp
         /// <exception cref="GaoLib.Api.Aimp.Exception.RemoteWindowNotFoundException"></exception>
         /// <exception cref="GaoLib.Api.Aimp.Exception.MessageTimeoutException"></exception>
         /// <exception cref="GaoLib.Api.Aimp.Exception.MessageException"></exception>
+        /*
         public static void ResisterNotify()
         {
             if (IsNotify) return;
             IsNotify = true;
+
+            Exception.AimpException aimpException = new Exception.AimpException();
+            try
+            {
+                var task = Task.Run(() =>
+                {
+                    try
+                    {
+                        var res2 = SendCommand(Core.Command.RegisterNotify, RecieverWindowHandle);
+                        NativeMethods.MessageStruct msg;
+                        sbyte ret;
+                        var sb = new StringBuilder();
+                        while ((ret = NativeMethods.GetMessage(out msg, RecieverWindowHandle, (uint)Core.WindowMessages.Notify, (uint)Core.WindowMessages.Notify)) != 0)
+                        {
+                            if (!IsRunning) break;
+
+                            var notify = (Core.Notify)msg.wParam.ToUInt32();
+
+                            sb.Clear();
+                            sb.Append(DateTime.UtcNow.Ticks);
+                            sb.Append(' ');
+                            sb.Append(Enum.GetName(typeof(Core.Notify), notify).ToLower());
+                            switch (notify)
+                            {
+                            case Core.Notify.Property:
+                                sb.Append(' ');
+                                sb.Append(Enum.GetName(typeof(Core.Property), msg.lParam.ToUInt32()).ToLower());
+                                break;
+                            case Core.Notify.TrackInfo:
+                                sb.Append(' ');
+                                sb.Append(msg.lParam.ToUInt32().ToString().ToLower());
+                                break;
+                            }
+                            Console.WriteLine(sb);
+                        }
+                    }
+                    catch (Exception.AimpException)
+                    {
+                        Console.WriteLine("it");
+                        throw new System.Exception("aa");
+                    }
+                });
+            }
+            catch (AggregateException e)
+            {
+                Console.WriteLine(e);
+            }
+            catch (System.Exception e)
+            {
+                Console.WriteLine(e);
+                //throw e.InnerException;
+            }
+            new Action(() => { }).BeginInvoke(;
+            Console.WriteLine("{0} {1} {2}", DateTime.UtcNow.Ticks, "aimpremote", "connect");
+        }
+         */
+        public static bool ResisterNotify()
+        {
+            if (!IsRunning) return false;
+
+            if (IsNotify) return false;
+            IsNotify = true;
+
             Task.Run(() =>
             {
-                var res2 = SendCommand(Core.Command.RegisterNotify, RecieverWindowHandle);
-                NativeMethods.MessageStruct msg;
-                sbyte ret;
-                var sb = new StringBuilder();
-                while ((ret = NativeMethods.GetMessage(out msg, RecieverWindowHandle, (uint)Core.WindowMessages.Notify, (uint)Core.WindowMessages.Notify)) != 0)
+                try
                 {
-                    if (!IsRunning) break;
+                    var res2 = SendCommand(Core.Command.RegisterNotify, RecieverWindowHandle);
+                    NativeMethods.MessageStruct msg;
+                    sbyte ret;
+                    var sb = new StringBuilder();
 
-                    var notify = (Core.Notify)msg.wParam.ToUInt32();
+                    Console.WriteLine(
+                        "{0} {1} {2}",
+                        DateTime.UtcNow.Ticks,
+                        Enum.GetName(typeof(Core.Notify), Core.Notify.Remote).ToLower(),
+                        "connect");
 
-                    sb.Clear();
-                    sb.Append(DateTime.UtcNow.Ticks);
-                    sb.Append(' ');
-                    sb.Append(Enum.GetName(typeof(Core.Notify), notify).ToLower());
-                    switch (notify)
+                    while ((ret = NativeMethods.GetMessage(out msg, RecieverWindowHandle, (uint)Core.WindowMessages.Notify, (uint)Core.WindowMessages.Notify)) != 0)
                     {
-                    case Core.Notify.Property:
-                        sb.Append(' ');
-                        sb.Append(Enum.GetName(typeof(Core.Property), msg.lParam.ToUInt32()).ToLower());
-                        break;
-                    case Core.Notify.TrackInfo:
-                        sb.Append(' ');
-                        sb.Append(msg.lParam.ToUInt32().ToString().ToLower());
-                        break;
-                    }
+                        if (!IsRunning) break;
+                        var notify = (Core.Notify)msg.wParam.ToUInt32();
 
-                    Console.WriteLine(sb);
+                        sb.Clear();
+                        sb.Append(DateTime.UtcNow.Ticks);
+                        sb.Append(' ');
+                        sb.Append(Enum.GetName(typeof(Core.Notify), notify).ToLower());
+                        switch (notify)
+                        {
+                        case Core.Notify.Property:
+                            sb.Append(' ');
+                            sb.Append(Enum.GetName(typeof(Core.Property), msg.lParam.ToUInt32()).ToLower());
+                            break;
+                        case Core.Notify.TrackInfo:
+                            sb.Append(' ');
+                            sb.Append(msg.lParam.ToUInt32().ToString().ToLower());
+                            break;
+                        }
+                        Console.WriteLine(sb);
+                    }
                 }
+                catch (Exception.AimpException) { }
             });
+
+            return true;
+        }
+
+        private static void _ResisterNotify()
+        {
+
         }
 
         /// <summary>
@@ -648,6 +730,13 @@ namespace GaoLib.Api.Aimp
             if (!IsNotify) return;
             IsNotify = false;
 
+            Console.WriteLine(
+                "{0} {1} {2}",
+                DateTime.UtcNow.Ticks,
+                Enum.GetName(typeof(Core.Notify), Core.Notify.Remote).ToLower(),
+                "disconnect");
+
+            if (!IsRunning) return;
             PostCommand(Core.Command.UnRegisterNotify, RecieverWindowHandle);
         }
         #endregion
